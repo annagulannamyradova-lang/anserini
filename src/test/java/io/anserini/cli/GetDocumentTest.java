@@ -127,6 +127,17 @@ public class GetDocumentTest extends StdOutStdErrRedirectableLuceneTestCase {
   }
 
   @Test
+  public void testGetDocumentWithPrebuiltCacm() {
+    GetDocument.main(new String[] {"--index", "cacm", "--docid", "CACM-0001"});
+
+    String output = out.toString();
+    assertTrue(output.contains("<html>"));
+    assertTrue(output.contains("Preliminary Report-International Algebraic Language"));
+    assertTrue(output.contains("CACM December, 1958"));
+    assertTrue(err.toString().isEmpty());
+  }
+
+  @Test
   public void testInteractiveGetDocumentWithCacm() {
     String stdin = "CACM-0001\n\nCACM-0002\n";
     System.setIn(new ByteArrayInputStream(stdin.getBytes(StandardCharsets.UTF_8)));
