@@ -88,7 +88,7 @@ public final class GetDocument {
     if (args.interactive) {
       runInteractive(args);
     } else {
-      runSingleDocid(args);
+      runSingleDocument(args);
     }
   }
 
@@ -119,7 +119,7 @@ public final class GetDocument {
     }
   }
 
-  private static void runSingleDocid(Args parsed) {
+  private static void runSingleDocument(Args parsed) {
     try (SimpleSearcher searcher = new SimpleSearcher(IndexReaderUtils.getIndex(parsed.index).toString())) {
       System.out.println(getRawDocument(searcher, parsed.docid));
     } catch (IllegalArgumentException | IOException e) {
