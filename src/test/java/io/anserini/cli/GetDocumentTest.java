@@ -33,6 +33,7 @@ import io.anserini.index.IndexCollection;
 
 public class GetDocumentTest extends StdOutStdErrRedirectableLuceneTestCase {
   private static Path cacmIndexPath;
+  private static Path cacmIndexWithoutRawPath;
 
   @BeforeClass
   public static void setupClass() throws Exception {
@@ -49,12 +50,28 @@ public class GetDocumentTest extends StdOutStdErrRedirectableLuceneTestCase {
         "-storeRaw",
         "-quiet"
     });
+
+    cacmIndexWithoutRawPath = Files.createTempDirectory("anserini-get-document-test-cacm-no-raw");
+    IndexCollection.main(new String[] {
+        "-collection", "HtmlCollection",
+        "-generator", "DefaultLuceneDocumentGenerator",
+        "-threads", "1",
+        "-input", "src/main/resources/cacm",
+        "-index", cacmIndexWithoutRawPath.toString(),
+        "-storePositions",
+        "-storeDocvectors",
+        "-storeContents",
+        "-quiet"
+    });
   }
 
   @AfterClass
   public static void tearDownClass() throws Exception {
     if (cacmIndexPath != null) {
       FileUtils.deleteDirectory(cacmIndexPath.toFile());
+    }
+    if (cacmIndexWithoutRawPath != null) {
+      FileUtils.deleteDirectory(cacmIndexWithoutRawPath.toFile());
     }
   }
 
@@ -127,5 +144,12 @@ public class GetDocumentTest extends StdOutStdErrRedirectableLuceneTestCase {
     GetDocument.main(new String[] {"--index", cacmIndexPath.toString(), "--docid", "CACM-9999"});
     assertTrue(out.toString().isEmpty());
     assertTrue(err.toString().contains("Error: Document not found: CACM-9999"));
+  }
+
+  @Test
+  public void testDocumentWithoutRawField() {
+    GetDocument.main(new String[] {"--index", cacmIndexWithoutRawPath.toString(), "--docid", "CACM-0001"});
+    assertTrue(out.toString().isEmpty());
+    assertTrue(err.toString().contains("Error: Document does not have stored raw field: CACM-0001"));
   }
 }
