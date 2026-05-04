@@ -108,7 +108,7 @@ public final class GetDocument {
           continue;
         }
 
-        printDocument(searcher, docid);
+        printRawDocument(searcher, docid);
       }
     } catch (IOException e) {
       System.err.printf("Error: %s%n", e.getMessage());
@@ -117,25 +117,31 @@ public final class GetDocument {
 
   private static void runSingleDocid(Args parsed) {
     try (SimpleSearcher searcher = new SimpleSearcher(IndexReaderUtils.getIndex(parsed.index).toString())) {
-      printDocument(searcher, parsed.docid);
+      printRawDocument(searcher, parsed.docid);
     } catch (IOException e) {
       System.err.printf("Error: %s%n", e.getMessage());
     }
   }
 
-  private static void printDocument(SimpleSearcher searcher, String docid) {
+  private static void printRawDocument(SimpleSearcher searcher, String docid) {
+    try {
+      System.out.println(getRawDocument(searcher, docid));
+    } catch (IllegalArgumentException e) {
+      System.err.printf("Error: %s%n", e.getMessage());
+    }
+  }
+
+  private static String getRawDocument(SimpleSearcher searcher, String docid) {
     Document document = searcher.doc(docid);
     if (document == null) {
-      System.err.printf("Error: Document not found: %s%n", docid);
-      return;
+      throw new IllegalArgumentException("Document not found: " + docid);
     }
 
     String raw = document.get(Constants.RAW);
     if (raw == null) {
-      System.err.printf("Error: Document does not have stored raw field: %s%n", docid);
-      return;
+      throw new IllegalArgumentException("Document does not have stored raw field: " + docid);
     }
 
-    System.out.println(raw);
+    return raw;
   }
 }
