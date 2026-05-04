@@ -108,7 +108,11 @@ public final class GetDocument {
           continue;
         }
 
-        printRawDocument(searcher, docid);
+        try {
+          System.out.println(getRawDocument(searcher, docid));
+        } catch (IllegalArgumentException e) {
+          System.err.printf("Error: %s%n", e.getMessage());
+        }
       }
     } catch (IOException e) {
       System.err.printf("Error: %s%n", e.getMessage());
@@ -117,16 +121,8 @@ public final class GetDocument {
 
   private static void runSingleDocid(Args parsed) {
     try (SimpleSearcher searcher = new SimpleSearcher(IndexReaderUtils.getIndex(parsed.index).toString())) {
-      printRawDocument(searcher, parsed.docid);
-    } catch (IOException e) {
-      System.err.printf("Error: %s%n", e.getMessage());
-    }
-  }
-
-  private static void printRawDocument(SimpleSearcher searcher, String docid) {
-    try {
-      System.out.println(getRawDocument(searcher, docid));
-    } catch (IllegalArgumentException e) {
+      System.out.println(getRawDocument(searcher, parsed.docid));
+    } catch (IllegalArgumentException | IOException e) {
       System.err.printf("Error: %s%n", e.getMessage());
     }
   }
